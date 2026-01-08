@@ -1,0 +1,91 @@
+[build]
+  command = "npm run build:client"
+  functions = "netlify/functions"
+  publish = "dist/spa"
+  node_version = "22"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Ably Integration Functions
+[functions."ably-token"]
+  description = "Generate Ably authentication tokens"
+  memory = 256
+  timeout = 10
+
+[functions."ably-publish"]
+  description = "Publish messages to Ably channels"
+  memory = 256
+  timeout = 10
+
+[functions."ably-stats"]
+  description = "Get Ably channel statistics and health"
+  memory = 256
+  timeout = 10
+
+
+# Ably API routes
+[[redirects]]
+  from = "/api/ably/token"
+  to = "/.netlify/functions/ably-token"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/ably/publish"
+  to = "/.netlify/functions/ably-publish"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/ably/stats"
+  to = "/.netlify/functions/ably-stats"
+  status = 200
+  force = true
+
+# API route redirects to serverless function
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
+
+# API health endpoint
+[[redirects]]
+  from = "/api/health"
+  to = "/.netlify/functions/health"
+  status = 200
+  force = true
+
+# SPA fallback for client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Production environment
+[context.production]
+  command = "npm run build:client"
+  [context.production.environment]
+    NODE_ENV = "production"
+    NETLIFY_ENV = "production"
+
+# Deploy preview environment
+[context.deploy-preview]
+  command = "npm run build:client"
+  [context.deploy-preview.environment]
+    NODE_ENV = "production"
+    NETLIFY_ENV = "deploy-preview"
+
+# Branch deploy environment
+[context.branch-deploy]
+  command = "npm run build:client"
+  [context.branch-deploy.environment]
+    NODE_ENV = "production"
+    NETLIFY_ENV = "branch-deploy"
+
+# Development environment
+[context.development]
+  [context.development.environment]
+    NODE_ENV = "development"
+    NETLIFY_ENV = "development"
